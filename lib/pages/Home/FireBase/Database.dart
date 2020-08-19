@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:recipemine/Custom/Models/Recipe.dart';
 import 'package:recipemine/Custom/Models/ReciperMinerUser.dart';
@@ -11,21 +10,19 @@ class DatabaseService {
   // collection reference
   final Firestore db = Firestore.instance;
 
-
-  Future<void> updateUserData(String name, String email, String UID, String ProfilePic, List<dynamic> Pantry, List<dynamic> Favourites) async {
-    return await db.collection('Users').document(UID).setData({
+  Future<void> updateUserData(String name, String email, String uid,
+      String profilePic, List<dynamic> pantry, List<dynamic> favourites) async {
+    return await db.collection('Users').document(uid).setData({
       'name': name,
       'email': email,
-      'UID': UID,
-      'ProfilePic': ProfilePic,
-      'Pantry' : Pantry,
-      'Favourites': Favourites,
+      'UID': uid,
+      'ProfilePic': profilePic,
+      'Pantry' : pantry,
+      'Favourites': favourites,
     });
-
   }
 
-
-  //get CurrentUser methods
+  // get CurrentUser methods
   Stream<RecipeMiner> get userData {
     return db.collection('Users').document(uid).snapshots()
         .map(_userDataFromSnapshot);
@@ -61,15 +58,14 @@ class DatabaseService {
     }).toList();
   }
 
-  //get all Recipes methods
+  // get all Recipes methods
   Stream<List<Recipe>> get recipeData{
     return db.collection('Recipes').snapshots().map(_recipeDataFromSnapShot);
   }
 
   List<Recipe> _recipeDataFromSnapShot(QuerySnapshot snapshot){
     return snapshot.documents.map((doc){
-      return
-      Recipe(
+      return Recipe(
         id: doc.documentID,
         name: doc.data['name'],
         type: RecipeType.values[doc.data['type']],
@@ -80,9 +76,9 @@ class DatabaseService {
         ingredients: doc.data['ingredients'],
         instructions: doc.data['instructions'],
         smartTimer: doc.data['smartTimer'],
+        ratings: doc.data['ratings'],
+        authorUID: doc.data['authorUID'],
       );
     }).toList();
   }
-
-
 }

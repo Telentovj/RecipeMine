@@ -6,10 +6,11 @@ import "package:recipemine/pages/Authentication/Wrapper.dart";
 
 void main() {
   runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
     routes: {
-      "/": (context) => LoadingScreen(),
+      "/": (context) => SplashScreen(),
       "/SearchPage": (context) => SearchPage(),
-      "/CookingAssistant": (context) => CookingAssistant(null),
+      "/CookingAssistant": (context) => CookingAssistant(recipe: null),
       "/AuthenticationWrapper" : (context) => Wrapper(),
     })
   );

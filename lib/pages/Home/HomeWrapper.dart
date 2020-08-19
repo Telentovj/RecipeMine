@@ -12,45 +12,34 @@ import 'SearchPage/SearchPage.dart';
 
 // HomeWrapper class houses the bottom navigation bar and app bar.
 class HomeWrapper extends StatefulWidget {
-  final Recipe recipe;
-  final int initialBottomNavigationBarIndex;
-
-  // Takes in a recipe to display in the CookingAssistant page
-  HomeWrapper({this.recipe, this.initialBottomNavigationBarIndex});
-
   @override
   _HomeWrapperState createState() => _HomeWrapperState();
 }
 
 class _HomeWrapperState extends State<HomeWrapper> {
 
-  int bottomNavigationBarIndex;
-  int navigationIndex;
+  int bottomNavigationBarIndex = 0;
+  int navigationIndex = 0;
 
   String name;
   String email;
 
-  @override
-  initState() {
-    super.initState();
-    bottomNavigationBarIndex = this.widget.initialBottomNavigationBarIndex;
-    navigationIndex = this.widget.initialBottomNavigationBarIndex;
-  }
+  Recipe recipe;
 
   List<Widget> _buildPages() {
     return [
-      Center(child:SearchPage()),
-      Center(child:CookingAssistant(this.widget.recipe)),
-      Center(child:Favourites()),
-      Center(child:Pantry()),
-      Center(child:Community()),
-      Center(child:Profile())
+      SearchPage(onBeginCooking: onBeginCooking),
+      CookingAssistant(recipe: recipe),
+      Favourites(onBeginCooking: onBeginCooking),
+      Pantry(),
+      Community(onBeginCooking: communityOnBeginCooking),
+      Profile(onBeginCooking: onBeginCooking)
     ];
   }
 
   List<Widget> _buildAppBarTitles() {
     return [
-      Text('Search Page'),
+      Text('Search'),
       Text('Assistant'),
       Text('Favourites'),
       Text('Pantry'),
@@ -70,7 +59,7 @@ class _HomeWrapperState extends State<HomeWrapper> {
         appBar: AppBar(
           title: _buildAppBarTitles()[navigationIndex],
           titleSpacing: 20.0,
-          backgroundColor: Color(0xffFF464F),
+          backgroundColor: Colors.redAccent,
           actions: <Widget>[
             FlatButton.icon(
               icon: Icon(Icons.person, color: Colors.white),
@@ -115,6 +104,26 @@ class _HomeWrapperState extends State<HomeWrapper> {
         )
       ),
     );
+  }
+
+  void onBeginCooking(Recipe recipe) {
+    setState(() {
+      bottomNavigationBarIndex = 1;
+      navigationIndex = 1;
+      this.recipe = recipe;
+      Navigator.of(context).pop();
+    });
+  }
+
+  void communityOnBeginCooking(Recipe recipe) {
+    // requires popping navigation twice
+    setState(() {
+      bottomNavigationBarIndex = 1;
+      navigationIndex = 1;
+      this.recipe = recipe;
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
+    });
   }
 }
 

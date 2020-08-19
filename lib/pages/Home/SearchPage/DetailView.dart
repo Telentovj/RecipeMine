@@ -1,13 +1,18 @@
-
 import 'package:flutter/material.dart';
+import 'package:recipemine/Custom/CustomWidgets/MainButton.dart';
 import 'package:recipemine/Custom/Models/Recipe.dart';
-import '../HomeWrapper.dart';
+import 'package:recipemine/Custom/Models/ReciperMinerUser.dart';
+import '../../../AppStyle.dart';
 import 'SliverCustomHeaderDelegate.dart';
 
+/// Builds the page displayed when clicking on a recipe.
 class DetailView extends StatefulWidget {
   final Recipe recipe;
+  final RecipeMiner user;
 
-  DetailView(this.recipe);
+  final Function onBeginCooking;
+
+  DetailView({@required this.recipe, @required this.user, @required this.onBeginCooking});
 
   @override
   _DetailViewState createState() => _DetailViewState();
@@ -34,7 +39,6 @@ class _DetailViewState extends State<DetailView> {
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 return Container(
-                  color: Colors.grey[200],
                   padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 50.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,12 +50,12 @@ class _DetailViewState extends State<DetailView> {
                         style: Theme.of(context).textTheme.headline6,
                       ),
                       SizedBox(height: 10),
-                      _buildIngredients(context),
+                      _buildIngredients(),
                       SizedBox(height: 20),
                       _buildBeginButton(),
                     ]
                   ),
-              );
+                );
               },
               childCount: 1,
             ),
@@ -62,12 +66,13 @@ class _DetailViewState extends State<DetailView> {
   }
 
   Widget _buildIconRow(Recipe recipe) {
+    int numIngredients = recipe.numberOfIngredientsPresent(widget.user.pantry);
     return Row(
       children: [
         _buildIcon(Icons.star, Color(0xffFFC440), recipe.rating.toString()),
         _buildIcon(Icons.schedule, Color(0xffFF5C64), recipe.duration.toString() + " min"),
         _buildIcon(Icons.people_outline, Color(0xff30C551), recipe.servingSize.toString()),
-        _buildIcon(Icons.kitchen, Color(0xff1D92FF), "4/${recipe.ingredients.length}"),
+        _buildIcon(Icons.kitchen, Color(0xff1D92FF), "$numIngredients/${recipe.ingredients.length}"),
       ],
     );
   }
@@ -97,15 +102,26 @@ class _DetailViewState extends State<DetailView> {
     );
   }
 
-  Widget _buildIngredients(BuildContext context) {
+  Widget _buildIngredients() {
     return Column(
       children: this.widget.recipe.ingredients.map((ingredient) =>
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget> [
-            Text(
-              ingredient,
-              style: Theme.of(context).textTheme.subtitle1,
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    ingredient,
+                    style: AppStyle.subtitle,
+                  ),
+                ),
+                SizedBox(
+                  child: pantryContainsIngredient(ingredient)
+                      ? Icon(Icons.check, color: Color(0xff1D92FF))
+                      : null,
+                ),
+              ],
             ),
             Divider(
               thickness: 1.5,
@@ -114,37 +130,29 @@ class _DetailViewState extends State<DetailView> {
           ],
         )).toList(),
     );
+  }
 
+  bool pantryContainsIngredient(String ingredient) {
+    return widget.user.pantry.any((pantryItem) {
+      String pantryIngredient = pantryItem.split(",").first;
+      return ingredient.contains(pantryIngredient.toLowerCase());
+    });
   }
 
   Widget _buildBeginButton() {
-    return Container(
-      height: 40,
-      width: 1000,
-      child: RaisedButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10)
-        ),
-        color: Colors.red,
-        child: Text(
-          "Begin Cooking",
-          style: TextStyle(
+    return MainButton(
+      child: Text(
+        "Begin Cooking",
+        style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 20
-          ),
         ),
-        onPressed: () {
-          // Returns a new instance of HomeWrapper with the selected recipe as the CookingAssistant page
-          // Probably not the best solution since this would remove all state from the other bottom
-          // navigation tabs
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => HomeWrapper(recipe: this.widget.recipe, initialBottomNavigationBarIndex: 1)),
-            (Route<dynamic> route) => false // Removes all routes below the pushed route by using a [RoutePredicate] that always returns false
-          );
-        },
       ),
+      width: double.maxFinite,
+      onPressed: () {
+        this.widget.onBeginCooking(this.widget.recipe);
+      },
     );
   }
 }

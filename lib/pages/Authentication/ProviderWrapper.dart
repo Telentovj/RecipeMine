@@ -15,8 +15,8 @@ class _ProviderWrapperState extends State<ProviderWrapper> {
     return StreamProvider<User>.value(
       value: AuthService().user,
       child: MaterialApp(
-        home: Wrapper(),
-      )
+          home: Wrapper()
+      ),
     );
   }
 }
